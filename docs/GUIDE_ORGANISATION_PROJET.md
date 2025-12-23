@@ -338,8 +338,8 @@ Une fois la bibliothèque ajoutée, toutes les fonctions wrapper sont disponible
 
 ## 📚 Ressources Complémentaires
 
-- **[GUIDE_SETUP_TEAM.md](./GUIDE_SETUP_TEAM.md)** : Guide complet de mise en place
-- **[GUIDE_AJOUTER_BIBLIOTHEQUE.md](./GUIDE_AJOUTER_BIBLIOTHEQUE.md)** : Comment créer de nouvelles bibliothèques
+- **[GUIDE_SETUP_TEAM.md](./docs/GUIDE_SETUP_TEAM.md)** : Guide complet de mise en place
+- **[GUIDE_AJOUTER_BIBLIOTHEQUE.md](./docs/GUIDE_AJOUTER_BIBLIOTHEQUE.md)** : Comment créer de nouvelles bibliothèques
 
 ---
 

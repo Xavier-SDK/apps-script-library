@@ -32,9 +32,9 @@ Connecteur pour interagir avec Odoo ERP.
 
 ### Pour les Administrateurs
 
-1. **Créez votre projet Apps Script partagé** : Suivez [GUIDE_SETUP_TEAM.md](./GUIDE_SETUP_TEAM.md)
-2. **Organisez vos bibliothèques** : Voir [GUIDE_ORGANISATION_PROJET.md](./GUIDE_ORGANISATION_PROJET.md)
-3. **Ajoutez de nouvelles bibliothèques** : Voir [GUIDE_AJOUTER_BIBLIOTHEQUE.md](./GUIDE_AJOUTER_BIBLIOTHEQUE.md)
+1. **Créez votre projet Apps Script partagé** : Suivez [GUIDE_SETUP_TEAM.md](./docs/GUIDE_SETUP_TEAM.md)
+2. **Organisez vos bibliothèques** : Voir [GUIDE_ORGANISATION_PROJET.md](./docs/GUIDE_ORGANISATION_PROJET.md)
+3. **Ajoutez de nouvelles bibliothèques** : Voir [GUIDE_AJOUTER_BIBLIOTHEQUE.md](./docs/GUIDE_AJOUTER_BIBLIOTHEQUE.md)
 
 ### Pour les Utilisateurs (Chefs de Projet)
 
@@ -48,33 +48,33 @@ Connecteur pour interagir avec Odoo ERP.
 
 ### 📚 Index Complet
 
-Consultez **[INDEX_DOCUMENTATION.md](./INDEX_DOCUMENTATION.md)** pour une vue d'ensemble complète de toute la documentation.
+Consultez **[INDEX_DOCUMENTATION.md](./docs/INDEX_DOCUMENTATION.md)** pour une vue d'ensemble complète de toute la documentation.
 
 ### 👨‍💼 Pour les Administrateurs
 
-- **[GUIDE_SETUP_TEAM.md](./GUIDE_SETUP_TEAM.md)** ⭐ **COMMENCEZ ICI**
+- **[GUIDE_SETUP_TEAM.md](./docs/GUIDE_SETUP_TEAM.md)** ⭐ **COMMENCEZ ICI**
   - Guide complet de mise en place
   - Comment créer et déployer la bibliothèque
   - Comment la partager avec l'équipe
 
-- **[GUIDE_ORGANISATION_PROJET.md](./GUIDE_ORGANISATION_PROJET.md)** 📁
+- **[GUIDE_ORGANISATION_PROJET.md](./docs/GUIDE_ORGANISATION_PROJET.md)** 📁
   - Comment organiser plusieurs bibliothèques dans un seul projet Apps Script
   - Structure avec plusieurs fichiers `.gs`
   - Bonnes pratiques
 
-- **[GUIDE_AJOUTER_BIBLIOTHEQUE.md](./GUIDE_AJOUTER_BIBLIOTHEQUE.md)** 📦
+- **[GUIDE_AJOUTER_BIBLIOTHEQUE.md](./docs/GUIDE_AJOUTER_BIBLIOTHEQUE.md)** 📦
   - Comment créer une nouvelle bibliothèque (ex: connecteur Odoo)
   - Structure modulaire
   - Templates et exemples
 
-- **[GUIDE_PARTAGE.md](./GUIDE_PARTAGE.md)**
+- **[GUIDE_PARTAGE.md](./docs/GUIDE_PARTAGE.md)**
   - Guide détaillé sur le partage de bibliothèques Apps Script
   - Gestion des versions
   - Sécurité et bonnes pratiques
 
 ### 👥 Pour les Utilisateurs
 
-- **[GUIDE_RAPIDE_EQUIPE.md](./GUIDE_RAPIDE_EQUIPE.md)** ⭐ **COMMENCEZ ICI**
+- **[GUIDE_RAPIDE_EQUIPE.md](./docs/GUIDE_RAPIDE_EQUIPE.md)** ⭐ **COMMENCEZ ICI**
   - Installation express en 5 minutes
   - Utilisation au quotidien
   - Résolution des problèmes courants
@@ -85,17 +85,21 @@ Consultez **[INDEX_DOCUMENTATION.md](./INDEX_DOCUMENTATION.md)** pour une vue d'
 
 ```
 apps-script-library/
-├── 📄 INDEX_DOCUMENTATION.md          Index complet de la documentation
-├── 📄 README.md                        Ce fichier
+├── 📄 README.md                        Ce fichier (README principal)
 │
-├── 👨‍💼 Documentation Administrateurs
-│   ├── 📄 GUIDE_SETUP_TEAM.md         Guide de mise en place complet
-│   ├── 📄 GUIDE_ORGANISATION_PROJET.md Comment organiser le projet Apps Script
-│   ├── 📄 GUIDE_AJOUTER_BIBLIOTHEQUE.md Comment créer de nouvelles bibliothèques
-│   └── 📄 GUIDE_PARTAGE.md            Guide de partage détaillé
-│
-├── 👥 Documentation Utilisateurs
-│   └── 📄 GUIDE_RAPIDE_EQUIPE.md      Guide d'installation et d'utilisation
+├── 📁 docs/                            Documentation complète
+│   ├── 📄 INDEX_DOCUMENTATION.md      Index complet de la documentation
+│   ├── 👨‍💼 Documentation Administrateurs
+│   │   ├── 📄 GUIDE_SETUP_TEAM.md     Guide de mise en place complet
+│   │   ├── 📄 GUIDE_ORGANISATION_PROJET.md Comment organiser le projet Apps Script
+│   │   ├── 📄 GUIDE_AJOUTER_BIBLIOTHEQUE.md Comment créer de nouvelles bibliothèques
+│   │   ├── 📄 GUIDE_PARTAGE.md        Guide de partage détaillé
+│   │   └── 📄 GUIDE_GITHUB.md         Guide pour publier sur GitHub
+│   │
+│   ├── 👥 Documentation Utilisateurs
+│   │   └── 📄 GUIDE_RAPIDE_EQUIPE.md  Guide d'installation et d'utilisation
+│   │
+│   └── 📄 PUBLIER_GITHUB.md           Instructions rapides pour GitHub
 │
 └── 📦 bibliotheques/                   Bibliothèques modulaires
     ├── vat-check/                      Bibliothèque VIES VAT

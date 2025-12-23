@@ -84,7 +84,7 @@ Dans Google Apps Script, vous pouvez avoir **plusieurs fichiers `.gs`** dans le 
 - ✅ Un fichier contient **toutes les fonctions d'une bibliothèque** (ex: toutes les fonctions VAT)
 - ❌ Ne créez **PAS** un fichier par fonction individuelle
 
-**📖 Voir [GUIDE_ORGANISATION_PROJET.md](./GUIDE_ORGANISATION_PROJET.md) pour plus de détails sur l'organisation avec plusieurs fichiers.**
+**📖 Voir [GUIDE_ORGANISATION_PROJET.md](./docs/GUIDE_ORGANISATION_PROJET.md) pour plus de détails sur l'organisation avec plusieurs fichiers.**
 
 #### 1.3 Déployer la Bibliothèque
 
@@ -400,8 +400,8 @@ Créez **un seul projet Apps Script** avec la bibliothèque, puis liez-le à tou
 ## 📚 Ressources Complémentaires
 
 - 📖 [Guide de Partage Détaillé](./GUIDE_PARTAGE.md)
-- 📖 [README avec Documentation Complète](./README.md)
-- 💻 [Exemples d'Utilisation](./example_usage.gs)
+- 📖 [README Principal](../README.md)
+- 💻 [Exemples d'Utilisation](../bibliotheques/vat-check/example_usage.gs)
 
 ---
 

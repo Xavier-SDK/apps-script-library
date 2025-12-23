@@ -12,33 +12,32 @@ Ce repository contient une bibliothèque Google Apps Script partagée que votre 
 
 **Vous créez et maintenez la bibliothèque partagée :**
 
-1. **[GUIDE_SETUP_TEAM.md](./GUIDE_SETUP_TEAM.md)** ⭐ **COMMENCEZ ICI**
+1. **[GUIDE_SETUP_TEAM.md](./docs/GUIDE_SETUP_TEAM.md)** ⭐ **COMMENCEZ ICI**
    - Guide complet de mise en place
    - Comment créer et déployer la bibliothèque
    - Comment la partager avec l'équipe
    - Gestion des versions et mises à jour
 
-2. **[GUIDE_ORGANISATION_PROJET.md](./GUIDE_ORGANISATION_PROJET.md)** 📁 **ORGANISATION AVEC PLUSIEURS FICHIERS**
+2. **[GUIDE_ORGANISATION_PROJET.md](./docs/GUIDE_ORGANISATION_PROJET.md)** 📁 **ORGANISATION AVEC PLUSIEURS FICHIERS**
    - Comment organiser plusieurs bibliothèques dans un seul projet Apps Script
    - Structure avec plusieurs fichiers `.gs`
    - Bonnes pratiques de nommage et organisation
    - **⭐ Méthode recommandée !**
 
-3. **[GUIDE_AJOUTER_BIBLIOTHEQUE.md](./GUIDE_AJOUTER_BIBLIOTHEQUE.md)** 📦 **POUR AJOUTER DES BIBLIOTHÈQUES**
+3. **[GUIDE_AJOUTER_BIBLIOTHEQUE.md](./docs/GUIDE_AJOUTER_BIBLIOTHEQUE.md)** 📦 **POUR AJOUTER DES BIBLIOTHÈQUES**
    - Comment créer une nouvelle bibliothèque (ex: connecteur Odoo)
    - Structure modulaire (un dossier par bibliothèque)
    - Templates et exemples
    - Intégration dans le projet partagé
 
-3. **[GUIDE_PARTAGE.md](./GUIDE_PARTAGE.md)**
+3. **[GUIDE_PARTAGE.md](./docs/GUIDE_PARTAGE.md)**
    - Guide détaillé sur le partage de bibliothèques Apps Script
    - Processus de gestion des versions
    - Sécurité et bonnes pratiques
 
-4. **[README.md](./README.md)**
-   - Documentation technique complète
-   - Liste de toutes les fonctions disponibles
-   - Exemples d'utilisation avancés
+4. **[README.md](../README.md)**
+   - README principal du projet
+   - Vue d'ensemble et démarrage rapide
 
 ---
 
@@ -46,7 +45,7 @@ Ce repository contient une bibliothèque Google Apps Script partagée que votre 
 
 **Vous utilisez la bibliothèque dans vos Google Sheets :**
 
-1. **[GUIDE_RAPIDE_EQUIPE.md](./GUIDE_RAPIDE_EQUIPE.md)** ⭐ **COMMENCEZ ICI**
+1. **[GUIDE_RAPIDE_EQUIPE.md](./docs/GUIDE_RAPIDE_EQUIPE.md)** ⭐ **COMMENCEZ ICI**
    - Installation express en 5 minutes
    - Comment ajouter la bibliothèque à un Google Sheet
    - Utilisation des fonctions au quotidien
@@ -103,15 +102,15 @@ apps-script-library/
 
 ### Si vous êtes Administrateur
 
-1. Lisez **[GUIDE_SETUP_TEAM.md](./GUIDE_SETUP_TEAM.md)**
+1. Lisez **[GUIDE_SETUP_TEAM.md](./docs/GUIDE_SETUP_TEAM.md)**
 2. Créez et déployez la bibliothèque
 3. Partagez l'ID de déploiement avec votre équipe
-4. Envoyez le lien vers **[GUIDE_RAPIDE_EQUIPE.md](./GUIDE_RAPIDE_EQUIPE.md)**
+4. Envoyez le lien vers **[GUIDE_RAPIDE_EQUIPE.md](./docs/GUIDE_RAPIDE_EQUIPE.md)**
 
 ### Si vous êtes Utilisateur
 
 1. Recevez l'ID de déploiement de votre administrateur
-2. Suivez **[GUIDE_RAPIDE_EQUIPE.md](./GUIDE_RAPIDE_EQUIPE.md)**
+2. Suivez **[GUIDE_RAPIDE_EQUIPE.md](./docs/GUIDE_RAPIDE_EQUIPE.md)**
 3. Copiez les fonctions depuis **[FONCTIONS_WRAPPER_TEMPLATE.gs](./FONCTIONS_WRAPPER_TEMPLATE.gs)**
 4. Utilisez les fonctions dans vos Google Sheets !
 
@@ -174,8 +173,8 @@ apps-script-library/
 ### Problèmes Courants
 
 Consultez la section **"Support et Dépannage"** dans :
-- **[GUIDE_SETUP_TEAM.md](./GUIDE_SETUP_TEAM.md)** (pour administrateurs)
-- **[GUIDE_RAPIDE_EQUIPE.md](./GUIDE_RAPIDE_EQUIPE.md)** (pour utilisateurs)
+- **[GUIDE_SETUP_TEAM.md](./docs/GUIDE_SETUP_TEAM.md)** (pour administrateurs)
+- **[GUIDE_RAPIDE_EQUIPE.md](./docs/GUIDE_RAPIDE_EQUIPE.md)** (pour utilisateurs)
 
 ### Contact
 
