@@ -1,0 +1,39 @@
+# Fichiers système
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Node.js (si vous utilisez npm/clasp localement)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Clasp
+.clasp.json
+.clasprc.json
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Fichiers temporaires
+*.tmp
+*.log
+*.bak
+*.backup
+
+# Variables d'environnement (si ajoutées plus tard)
+.env
+.env.local
+
