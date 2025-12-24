@@ -24,7 +24,7 @@
 
 /**
  * @typedef {Object} TVAObject
- * @property {function(string, string=): boolean|Object} validateVAT - Valide un numéro de TVA. Mode: "debug" (détails), "force" (ignore format/clé), ou vide (normal)
+ * @property {function(string, string=): boolean|Object} validateVAT - Valide un numéro de TVA. Mode: "debug" (détails),"basic" (format+clé uniquement), "force" (API VIES uniquement), ou vide (format+clé+API)
  * @property {function(string): string} validateVATCompany - Valide un numéro de TVA et retourne le nom de l'entreprise
  * @property {function(string): Object} validateVATFull - Valide un numéro de TVA et retourne toutes les informations
  * @property {function(Array<string>): Array<Object>} validateVATBatch - Valide plusieurs numéros de TVA en batch
@@ -50,10 +50,10 @@ var SDK;
 // ============================================================================
 
 /**
- * Valide un numéro de TVA (pour Google Sheets)
- * @param {string} vatNumber - Numéro de TVA complet (ex: "FR18417798402")
- * @param {string=} mode - Mode optionnel : "debug" (détails), "force" (ignore format/clé), ou vide (normal)
- * @return {boolean|string} VRAI si valide, FAUX sinon. En mode "debug", retourne une chaîne formatée
+ * Valide un numéro de TVA intracommunautaire
+ * @param {string} vatNumber - Numéro de TVA avec préfixe pays (ex: "FR18417798402", "DE123456789")
+ * @param {string=} mode - Mode optionnel : "" (normal: format+clé+API), "basic" (format+clé uniquement), "force" (API uniquement), "debug" (détails: "STEP:REASON")
+ * @return {boolean|string} VRAI/FAUX ou "STEP:REASON" en mode debug (ex: "FORMAT:INVALID_FORMAT_FR")
  * @customfunction
  */
 function ESTTVA(vatNumber, mode) {
@@ -76,8 +76,8 @@ function ESTTVA(vatNumber, mode) {
 }
 
 /**
- * Retourne le nom de l'entreprise à partir d'un numéro de TVA
- * @param {string} vatNumber - Numéro de TVA complet
+ * Retourne le nom de l'entreprise associée à un numéro de TVA
+ * @param {string} vatNumber - Numéro de TVA avec préfixe pays (ex: "FR18417798402")
  * @return {string} Nom de l'entreprise ou "INVALIDE"
  * @customfunction
  */
@@ -87,9 +87,9 @@ function TVA_SOCIETE(vatNumber) {
 }
 
 /**
- * Retourne l'adresse de l'entreprise à partir d'un numéro de TVA
- * @param {string} vatNumber - Numéro de TVA complet
- * @return {string} Adresse de l'entreprise ou "INVALIDE"
+ * Retourne l'adresse de l'entreprise associée à un numéro de TVA
+ * @param {string} vatNumber - Numéro de TVA avec préfixe pays (ex: "FR18417798402")
+ * @return {string} Adresse complète ou "INVALIDE"
  * @customfunction
  */
 function TVA_ADDRESSE(vatNumber) {
@@ -102,9 +102,9 @@ function TVA_ADDRESSE(vatNumber) {
 }
 
 /**
- * Retourne toutes les informations TVA sous forme de texte formaté
- * @param {string} vatNumber - Numéro de TVA complet
- * @return {string} Informations complètes formatées
+ * Retourne les informations TVA (nom et adresse) formatées
+ * @param {string} vatNumber - Numéro de TVA avec préfixe pays (ex: "FR18417798402")
+ * @return {string} "Nom - Adresse" si valide, "ERREUR: ..." ou "INVALIDE"
  * @customfunction
  */
 function TVA_INFO(vatNumber) {
@@ -127,9 +127,9 @@ function TVA_INFO(vatNumber) {
 }
 
 /**
- * Retourne le statut de validation
- * @param {string} vatNumber - Numéro de TVA complet
- * @return {string} "VALIDE", "INVALIDE" ou "ERREUR"
+ * Retourne le statut de validation d'un numéro de TVA
+ * @param {string} vatNumber - Numéro de TVA avec préfixe pays (ex: "FR18417798402")
+ * @return {string} "VALIDE" (existe dans VIES), "INVALIDE" ou "ERREUR"
  * @customfunction
  */
 function TVA_STATUS(vatNumber) {
@@ -153,17 +153,18 @@ function TVA_LIBRARY_VERSION() {
 }
 
 /**
- * Génère un numéro de TVA valide pour un pays donné (pour tests)
- * @param {string} countryCode - Code pays à 2 lettres (ex: "FR", "DE")
- * @return {string} Numéro de TVA valide avec préfixe pays
+ * Génère un numéro de TVA valide (format+clé) pour un pays (tests uniquement)
+ * @param {string} countryCode - Code pays UE à 2 lettres (ex: "FR", "DE", "IT", "ES")
+ * @return {string} Numéro de TVA valide (ex: "FR18417798402") ou code d'erreur ("ERROR:INVALID_ARGUMENT", "ERROR:UNSUPPORTED_COUNTRY")
  * @customfunction
  */
 function TVA_GENERER(countryCode) {
-  if (!countryCode) return "";
-  try {
-    return SDK.TVA.generateVATNumber(countryCode.toString().trim().toUpperCase());
-  } catch (e) {
-    return "ERREUR: " + e.toString();
+  if (!countryCode) return "ERROR:INVALID_ARGUMENT";
+  const result = SDK.TVA.generateVATNumber(countryCode.toString().trim().toUpperCase());
+  // Si le résultat commence par "ERROR:", c'est un code d'erreur
+  if (result && result.indexOf('ERROR:') === 0) {
+    return result;
   }
+  return result;
 }
 

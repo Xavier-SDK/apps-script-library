@@ -69,6 +69,36 @@ var result = TVA.validateVAT("FR18417798402", "debug");
 
 ---
 
+### Mode Basic
+
+**Utilisation :**
+```javascript
+TVA.validateVAT("FR18417798402", "basic");
+```
+
+**Comportement :**
+- Parse du numéro
+- Vérification du format
+- Vérification de la clé de contrôle
+- **N'appelle PAS** l'API VIES
+
+**Retour :** `boolean` (true/false)
+
+**Cas d'usage :**
+- Validation rapide sans appel API (évite les limites de rate limiting)
+- Vérification de format et clé uniquement
+- Tests de numéros générés localement
+- Validation hors ligne
+
+**Exemple :**
+```javascript
+// Validation locale uniquement (format + clé)
+TVA.validateVAT("FR18417798402", "basic");
+// → true si format et clé valides, false sinon (sans appel API)
+```
+
+---
+
 ### Mode Force
 
 **Utilisation :**
@@ -106,6 +136,7 @@ La fonction wrapper `ESTTVA()` supporte aussi le paramètre `mode` :
 ```excel
 =ESTTVA("FR18417798402")           → VRAI ou FAUX (mode normal)
 =ESTTVA("FR18417798402", "debug")  → "VALIDE" ou "FORMAT:INVALID_FORMAT_FR"
+=ESTTVA("FR18417798402", "basic")  → VRAI ou FAUX (validation locale uniquement)
 =ESTTVA("FR18417798402", "force")  → VRAI ou FAUX (ignore format/clé)
 ```
 
@@ -127,6 +158,13 @@ B1: =ESTTVA(A1, "debug")
 A2: FR18417798403
 B2: =ESTTVA(A2, "debug")
     → "ALGORITHM:INVALID_CHECKSUM_FR"
+```
+
+#### Mode Basic
+```
+A1: FR18417798402
+B1: =ESTTVA(A1, "basic")
+    → Validation locale uniquement (format + clé, pas d'API)
 ```
 
 #### Mode Force

@@ -19,7 +19,7 @@
 
 /**
  * @typedef {Object} TVAObject
- * @property {function(string, string=): boolean|Object} validateVAT - Valide un numéro de TVA et retourne VRAI ou FAUX (ou objet en mode debug)
+ * @property {function(string, string=): boolean|Object} validateVAT - Valide un numéro de TVA. Modes: "debug" (détails), "force" (ignore format/clé), "basic" (sans API), ou vide (normal)
  * @property {function(string): string} validateVATCompany - Valide un numéro de TVA et retourne le nom de l'entreprise
  * @property {function(string): Object} validateVATFull - Valide un numéro de TVA et retourne toutes les informations
  * @property {function(Array<string>): Array<Object>} validateVATBatch - Valide plusieurs numéros de TVA en batch
@@ -78,15 +78,17 @@ var TVA = (function() {
       }
     }
     
-    // Si pas de code pays mais format numérique, essayer FR
+    // Si pas de code pays mais format numérique, essayer FR (compatibilité)
     const cleanVat = vat.replace(/[^0-9A-Z]/g, '');
     if (cleanVat.length >= 8 && /^[0-9A-Z]+$/.test(cleanVat)) {
+      // Retourner avec countryCode null pour indiquer qu'il n'y a pas de préfixe pays
       return {
-        countryCode: 'FR',
+        countryCode: null,
         vatNumber: cleanVat
       };
     }
     
+    // Si aucun format reconnu, retourner null
     return null;
   }
   
@@ -155,6 +157,34 @@ var TVA = (function() {
   }
   
   /**
+   * Calcule une somme pondérée avec des poids
+   * @param {string} digits - Chaîne de chiffres
+   * @param {Array<number>} weights - Tableau de poids
+   * @param {number} startIndex - Index de départ (défaut: 0)
+   * @param {number} length - Longueur à traiter (défaut: weights.length)
+   * @param {boolean} sumDigits - Si true, additionne les chiffres du produit (ex: 12 -> 1+2)
+   * @return {number} Somme calculée
+   * @private
+   */
+  function calculateWeightedSum(digits, weights, startIndex, length, sumDigits) {
+    startIndex = startIndex || 0;
+    length = length || weights.length;
+    sumDigits = sumDigits || false;
+    
+    let sum = 0;
+    for (let i = 0; i < length; i++) {
+      const digit = parseInt(digits[startIndex + i]);
+      const product = digit * weights[i];
+      if (sumDigits) {
+        sum += Math.floor(product / 10) + (product % 10);
+      } else {
+        sum += product;
+      }
+    }
+    return sum;
+  }
+  
+  /**
    * Valide algorithmiquement un numéro de TVA selon le pays
    * @param {string} countryCode - Code pays (ex: "FR", "BE")
    * @param {string} vatNumber - Numéro de TVA sans préfixe pays
@@ -179,23 +209,15 @@ var TVA = (function() {
         
       case 'DE': // Allemagne : Modulo 11
         if (digits.length !== 9) return false;
-        let deSum = 0;
         const deWeights = [1, 2, 1, 2, 1, 2, 1, 2];
-        for (let i = 0; i < 8; i++) {
-          let product = parseInt(digits[i]) * deWeights[i];
-          deSum += Math.floor(product / 10) + (product % 10);
-        }
+        const deSum = calculateWeightedSum(digits, deWeights, 0, 8, true);
         const deCheck = (10 - (deSum % 10)) % 10;
         return deCheck === parseInt(digits[8]);
         
       case 'IT': // Italie : Modulo 11
         if (digits.length !== 11) return false;
-        let itSum = 0;
         const itWeights = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2];
-        for (let i = 0; i < 10; i++) {
-          let product = parseInt(digits[i]) * itWeights[i];
-          itSum += Math.floor(product / 10) + (product % 10);
-        }
+        const itSum = calculateWeightedSum(digits, itWeights, 0, 10, true);
         const itCheck = (10 - (itSum % 10)) % 10;
         return itCheck === parseInt(digits[10]);
         
@@ -203,12 +225,8 @@ var TVA = (function() {
         if (vatNumber.length !== 9) return false;
         const esDigits = vatNumber.substring(0, 8).replace(/[^0-9]/g, '');
         if (esDigits.length !== 8) return false;
-        let esSum = 0;
         const esWeights = [2, 1, 2, 1, 2, 1, 2];
-        for (let i = 0; i < 7; i++) {
-          let product = parseInt(esDigits[i]) * esWeights[i];
-          esSum += Math.floor(product / 10) + (product % 10);
-        }
+        const esSum = calculateWeightedSum(esDigits, esWeights, 0, 7, true);
         const esCheck = (10 - (esSum % 10)) % 10;
         const esLastChar = vatNumber.substring(8, 9);
         if (/[0-9]/.test(esLastChar)) {
@@ -228,11 +246,8 @@ var TVA = (function() {
       case 'NL': // Pays-Bas : Modulo 11
         if (vatNumber.length !== 12) return false;
         const nlDigits = vatNumber.substring(0, 9);
-        let nlSum = 0;
         const nlWeights = [9, 8, 7, 6, 5, 4, 3, 2];
-        for (let i = 0; i < 8; i++) {
-          nlSum += parseInt(nlDigits[i]) * nlWeights[i];
-        }
+        const nlSum = calculateWeightedSum(nlDigits, nlWeights, 0, 8, false);
         const nlCheck = nlSum % 11;
         if (nlCheck < 10) {
           return parseInt(nlDigits[8]) === nlCheck;
@@ -241,11 +256,8 @@ var TVA = (function() {
         
       case 'PT': // Portugal : Modulo 11
         if (digits.length !== 9) return false;
-        let ptSum = 0;
         const ptWeights = [9, 8, 7, 6, 5, 4, 3, 2];
-        for (let i = 0; i < 8; i++) {
-          ptSum += parseInt(digits[i]) * ptWeights[i];
-        }
+        const ptSum = calculateWeightedSum(digits, ptWeights, 0, 8, false);
         const ptCheck = 11 - (ptSum % 11);
         if (ptCheck >= 10) return parseInt(digits[8]) === 0;
         return parseInt(digits[8]) === ptCheck;
@@ -253,22 +265,15 @@ var TVA = (function() {
       case 'AT': // Autriche : Modulo 11
         if (vatNumber.length !== 9 || !vatNumber.startsWith('U')) return false;
         const atDigits = vatNumber.substring(1);
-        let atSum = 0;
         const atWeights = [1, 2, 1, 2, 1, 2, 1, 2];
-        for (let i = 0; i < 8; i++) {
-          let product = parseInt(atDigits[i]) * atWeights[i];
-          atSum += Math.floor(product / 10) + (product % 10);
-        }
+        const atSum = calculateWeightedSum(atDigits, atWeights, 0, 8, true);
         const atCheck = (10 - (atSum % 10)) % 10;
         return atCheck === parseInt(atDigits[8]);
         
       case 'DK': // Danemark : Modulo 11
         if (digits.length !== 8) return false;
-        let dkSum = 0;
         const dkWeights = [2, 7, 6, 5, 4, 3, 2];
-        for (let i = 0; i < 7; i++) {
-          dkSum += parseInt(digits[i]) * dkWeights[i];
-        }
+        const dkSum = calculateWeightedSum(digits, dkWeights, 0, 7, false);
         const dkCheck = dkSum % 11;
         if (dkCheck === 0) return parseInt(digits[7]) === 0;
         if (dkCheck === 1) return false; // Invalide
@@ -276,11 +281,8 @@ var TVA = (function() {
         
       case 'FI': // Finlande : Modulo 11
         if (digits.length !== 8) return false;
-        let fiSum = 0;
         const fiWeights = [7, 9, 10, 5, 8, 4, 2];
-        for (let i = 0; i < 7; i++) {
-          fiSum += parseInt(digits[i]) * fiWeights[i];
-        }
+        const fiSum = calculateWeightedSum(digits, fiWeights, 0, 7, false);
         const fiCheck = fiSum % 11;
         if (fiCheck === 0) return parseInt(digits[7]) === 0;
         if (fiCheck === 1) return false; // Invalide
@@ -302,11 +304,8 @@ var TVA = (function() {
         
       case 'PL': // Pologne : Modulo 11
         if (digits.length !== 10) return false;
-        let plSum = 0;
         const plWeights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
-        for (let i = 0; i < 9; i++) {
-          plSum += parseInt(digits[i]) * plWeights[i];
-        }
+        const plSum = calculateWeightedSum(digits, plWeights, 0, 9, false);
         const plCheck = plSum % 11;
         if (plCheck === 10) return false; // Invalide
         return parseInt(digits[9]) === plCheck;
@@ -318,11 +317,8 @@ var TVA = (function() {
         
       case 'SK': // Slovaquie : Modulo 11
         if (digits.length !== 10) return false;
-        let skSum = 0;
         const skWeights = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        for (let i = 0; i < 9; i++) {
-          skSum += parseInt(digits[i]) * skWeights[i];
-        }
+        const skSum = calculateWeightedSum(digits, skWeights, 0, 9, false);
         const skCheck = skSum % 11;
         if (skCheck === 10) return parseInt(digits[9]) === 0;
         return parseInt(digits[9]) === skCheck;
@@ -332,6 +328,79 @@ var TVA = (function() {
         // La validation se fera uniquement via le format et l'API
         return true;
     }
+  }
+  
+  /**
+   * Crée un objet d'erreur standardisé
+   * @param {string} error - Message d'erreur
+   * @return {object} Objet d'erreur standardisé
+   * @private
+   */
+  function createErrorResult(error) {
+    return {
+      valid: false,
+      companyName: '',
+      address: '',
+      requestDate: '',
+      error: error
+    };
+  }
+  
+  /**
+   * Crée un objet de résultat valide standardisé
+   * @param {string} companyName - Nom de l'entreprise
+   * @param {string} address - Adresse
+   * @param {string} requestDate - Date de la requête
+   * @return {object} Objet de résultat valide
+   * @private
+   */
+  function createValidResult(companyName, address, requestDate) {
+    return {
+      valid: true,
+      companyName: companyName || '',
+      address: address || '',
+      requestDate: requestDate || '',
+      error: null
+    };
+  }
+  
+  /**
+   * Effectue la validation complète d'un numéro de TVA (sans appel API)
+   * @param {object} parsed - Objet parsé {countryCode, vatNumber}
+   * @param {boolean} skipFormat - Si true, ignore la vérification du format
+   * @param {boolean} skipAlgorithm - Si true, ignore la vérification algorithmique
+   * @return {object|null} {step: string, reason: string} si invalide, null si valide
+   * @private
+   */
+  function validateVATSteps(parsed, skipFormat, skipAlgorithm) {
+    skipFormat = skipFormat || false;
+    skipAlgorithm = skipAlgorithm || false;
+    
+    // 0. Vérifier si le pays est dans la liste des 27 pays UE supportés
+    if (!isSupportedCountry(parsed.countryCode)) {
+      return {
+        step: 'COUNTRY',
+        reason: 'NOT_EU'
+      };
+    }
+    
+    // 1. Vérifier le format du numéro
+    if (!skipFormat && !validateVATFormat(parsed.countryCode, parsed.vatNumber)) {
+      return {
+        step: 'FORMAT',
+        reason: 'INVALID_FORMAT_' + parsed.countryCode
+      };
+    }
+    
+    // 2. Vérifier la clé de contrôle algorithmique (si algorithme disponible)
+    if (!skipAlgorithm && !validateVATAlgorithm(parsed.countryCode, parsed.vatNumber)) {
+      return {
+        step: 'ALGORITHM',
+        reason: 'INVALID_CHECKSUM_' + parsed.countryCode
+      };
+    }
+    
+    return null; // Toutes les validations sont passées
   }
   
   /**
@@ -361,151 +430,108 @@ var TVA = (function() {
       
       if (responseCode === 200) {
         const data = JSON.parse(response.getContentText());
-        return {
-          valid: data.valid === true,
-          companyName: data.name || '',
-          address: data.address || '',
-          requestDate: data.requestDate || '',
-          error: null
-        };
+        if (data.valid === true) {
+          return createValidResult(data.name, data.address, data.requestDate);
+        } else {
+          return createErrorResult('Numéro non trouvé dans VIES');
+        }
       } else {
         const errorData = JSON.parse(response.getContentText());
-        return {
-          valid: false,
-          companyName: '',
-          address: '',
-          requestDate: '',
-          error: errorData.error || 'Erreur API VIES'
-        };
+        return createErrorResult(errorData.error || 'Erreur API VIES');
       }
     } catch (error) {
-      return {
-        valid: false,
-        companyName: '',
-        address: '',
-        requestDate: '',
-        error: error.toString()
-      };
+      return createErrorResult(error.toString());
     }
   }
   
   /**
    * Valide un numéro de TVA et retourne VRAI ou FAUX
    * @param {string} vatNumber - Numéro de TVA complet (ex: "FR18417798402")
-   * @param {string=} mode - Mode de validation : "debug" (détails), "force" (ignore format/clé), ou vide (normal)
+   * @param {string=} mode - Mode de validation : "debug" (détails), "force" (ignore format/clé), "basic" (sans API), ou vide (normal)
    * @return {boolean|Object} VRAI si valide, FAUX sinon. En mode "debug", retourne {valid: boolean, step: string, reason: string}
    */
+  /**
+   * Convertit une erreur API en mot-clé pour le mode debug
+   * @param {string} error - Message d'erreur
+   * @return {string} Mot-clé de l'erreur
+   * @private
+   */
+  function convertErrorToReason(error) {
+    if (!error) return 'NOT_FOUND';
+    const errorLower = error.toLowerCase();
+    if (errorLower.indexOf('invalid') !== -1) return 'API_INVALID';
+    if (errorLower.indexOf('not found') !== -1 || errorLower.indexOf('notfound') !== -1) return 'NOT_FOUND';
+    if (errorLower.indexOf('timeout') !== -1) return 'API_TIMEOUT';
+    if (errorLower.indexOf('error') !== -1) return 'API_ERROR';
+    return 'NOT_FOUND';
+  }
+  
   function validateVAT(vatNumber, mode) {
     mode = mode || '';
+    const parsed = parseVATNumber(vatNumber);
     
-    // Mode debug : retourner des détails
-    if (mode === 'debug') {
-      const parsed = parseVATNumber(vatNumber);
-      if (!parsed) {
-        return {
-          valid: false,
-          step: 'PARSE',
-          reason: 'INVALID_FORMAT'
-        };
+    if (!parsed) {
+      if (mode === 'debug') {
+        return { valid: false, step: 'PARSE', reason: 'INVALID_FORMAT' };
       }
-      
-      // 0. Vérifier si le pays est dans la liste des 27 pays UE supportés
-      if (!isSupportedCountry(parsed.countryCode)) {
-        return {
-          valid: false,
-          step: 'COUNTRY',
-          reason: 'NOT_EU'
-        };
+      return false;
+    }
+    
+    // Vérifier si le code pays existe (pas de code pays = null)
+    if (!parsed.countryCode) {
+      if (mode === 'debug') {
+        return { valid: false, step: 'COUNTRY', reason: 'NULL' };
       }
-      
-      // 1. Vérifier le format du numéro
-      if (!validateVATFormat(parsed.countryCode, parsed.vatNumber)) {
-        return {
-          valid: false,
-          step: 'FORMAT',
-          reason: 'INVALID_FORMAT_' + parsed.countryCode
-        };
-      }
-      
-      // 2. Vérifier la clé de contrôle algorithmique (si algorithme disponible)
-      if (!validateVATAlgorithm(parsed.countryCode, parsed.vatNumber)) {
-        return {
-          valid: false,
-          step: 'ALGORITHM',
-          reason: 'INVALID_CHECKSUM_' + parsed.countryCode
-        };
-      }
-      
-      // 3. Si format et clé valides, vérifier via l'API VIES
-      const result = validateVATInternal(parsed.countryCode, parsed.vatNumber);
-      if (result.valid) {
-        return {
-          valid: true,
-          step: 'API',
-          reason: 'VALID'
-        };
-      } else {
-        // Convertir l'erreur en mot-clé
-        let reason = 'NOT_FOUND';
-        if (result.error) {
-          const errorLower = result.error.toLowerCase();
-          if (errorLower.indexOf('invalid') !== -1) {
-            reason = 'API_INVALID';
-          } else if (errorLower.indexOf('not found') !== -1 || errorLower.indexOf('notfound') !== -1) {
-            reason = 'NOT_FOUND';
-          } else if (errorLower.indexOf('timeout') !== -1) {
-            reason = 'API_TIMEOUT';
-          } else if (errorLower.indexOf('error') !== -1) {
-            reason = 'API_ERROR';
-          }
-        }
-        return {
-          valid: false,
-          step: 'API',
-          reason: reason
-        };
-      }
+      return false;
     }
     
     // Mode force : ignorer format et clé, aller directement à l'API
     if (mode === 'force') {
-      const parsed = parseVATNumber(vatNumber);
-      if (!parsed) {
-        return false;
-      }
-      
-      // Vérifier si le pays est dans la liste des 27 pays UE supportés
       if (!isSupportedCountry(parsed.countryCode)) {
         return false;
       }
-      
-      // Aller directement à l'API VIES
       const result = validateVATInternal(parsed.countryCode, parsed.vatNumber);
       return result.valid;
     }
     
+    // Vérifier les étapes de validation (format + algorithme)
+    const validationError = validateVATSteps(parsed, false, false);
+    
+    // Mode basic : validation locale uniquement (sans API VIES)
+    if (mode === 'basic') {
+      // Retourne true si toutes les validations locales passent (pays, format, clé)
+      return !validationError;
+    }
+    
+    // Mode debug : retourner des détails
+    if (mode === 'debug') {
+      if (validationError) {
+        return {
+          valid: false,
+          step: validationError.step,
+          reason: validationError.reason
+        };
+      }
+      
+      // Si format et clé valides, vérifier via l'API VIES
+      const result = validateVATInternal(parsed.countryCode, parsed.vatNumber);
+      if (result.valid) {
+        return { valid: true, step: 'API', reason: 'VALID' };
+      } else {
+        return {
+          valid: false,
+          step: 'API',
+          reason: convertErrorToReason(result.error)
+        };
+      }
+    }
+    
     // Mode normal : validation complète
-    const parsed = parseVATNumber(vatNumber);
-    if (!parsed) {
+    if (validationError) {
       return false;
     }
     
-    // 0. Vérifier si le pays est dans la liste des 27 pays UE supportés
-    if (!isSupportedCountry(parsed.countryCode)) {
-      return false;
-    }
-    
-    // 1. Vérifier le format du numéro
-    if (!validateVATFormat(parsed.countryCode, parsed.vatNumber)) {
-      return false;
-    }
-    
-    // 2. Vérifier la clé de contrôle algorithmique (si algorithme disponible)
-    if (!validateVATAlgorithm(parsed.countryCode, parsed.vatNumber)) {
-      return false;
-    }
-    
-    // 3. Si format et clé valides, vérifier via l'API VIES
+    // Si format et clé valides, vérifier via l'API VIES
     const result = validateVATInternal(parsed.countryCode, parsed.vatNumber);
     return result.valid;
   }
@@ -521,28 +547,13 @@ var TVA = (function() {
       return 'INVALIDE';
     }
     
-    // 0. Vérifier si le pays est dans la liste des 27 pays UE supportés
-    if (!isSupportedCountry(parsed.countryCode)) {
+    const validationError = validateVATSteps(parsed, false, false);
+    if (validationError) {
       return 'INVALIDE';
     }
     
-    // 1. Vérifier le format du numéro
-    if (!validateVATFormat(parsed.countryCode, parsed.vatNumber)) {
-      return 'INVALIDE';
-    }
-    
-    // 2. Vérifier la clé de contrôle algorithmique (si algorithme disponible)
-    if (!validateVATAlgorithm(parsed.countryCode, parsed.vatNumber)) {
-      return 'INVALIDE';
-    }
-    
-    // 3. Si format et clé valides, vérifier via l'API VIES
     const result = validateVATInternal(parsed.countryCode, parsed.vatNumber);
-    if (result.valid) {
-      return result.companyName || 'VALIDE';
-    }
-    
-    return 'INVALIDE';
+    return result.valid ? (result.companyName || 'VALIDE') : 'INVALIDE';
   }
   
   /**
@@ -553,45 +564,22 @@ var TVA = (function() {
   function validateVATFull(vatNumber) {
     const parsed = parseVATNumber(vatNumber);
     if (!parsed) {
-      return {
-        valid: false,
-        companyName: '',
-        address: '',
-        error: 'Format invalide'
-      };
+      return createErrorResult('Format invalide');
     }
     
-    // 0. Vérifier si le pays est dans la liste des 27 pays UE supportés
-    if (!isSupportedCountry(parsed.countryCode)) {
-      return {
-        valid: false,
-        companyName: '',
-        address: '',
-        error: 'Pays non UE: ' + parsed.countryCode
-      };
+    const validationError = validateVATSteps(parsed, false, false);
+    if (validationError) {
+      let errorMsg = 'Format invalide';
+      if (validationError.step === 'COUNTRY') {
+        errorMsg = 'Pays non UE: ' + parsed.countryCode;
+      } else if (validationError.step === 'FORMAT') {
+        errorMsg = 'Format invalide pour ' + parsed.countryCode;
+      } else if (validationError.step === 'ALGORITHM') {
+        errorMsg = 'Clé de contrôle invalide pour ' + parsed.countryCode;
+      }
+      return createErrorResult(errorMsg);
     }
     
-    // 1. Vérifier le format du numéro
-    if (!validateVATFormat(parsed.countryCode, parsed.vatNumber)) {
-      return {
-        valid: false,
-        companyName: '',
-        address: '',
-        error: 'Format invalide pour ' + parsed.countryCode
-      };
-    }
-    
-    // 2. Vérifier la clé de contrôle algorithmique (si algorithme disponible)
-    if (!validateVATAlgorithm(parsed.countryCode, parsed.vatNumber)) {
-      return {
-        valid: false,
-        companyName: '',
-        address: '',
-        error: 'Clé de contrôle invalide pour ' + parsed.countryCode
-      };
-    }
-    
-    // 3. Si format et clé valides, vérifier via l'API VIES
     return validateVATInternal(parsed.countryCode, parsed.vatNumber);
   }
   
@@ -621,37 +609,22 @@ var TVA = (function() {
         continue;
       }
       
-      // Vérifier si le pays est dans la liste des 27 pays UE supportés
-      if (!isSupportedCountry(parsed.countryCode)) {
+      const validationError = validateVATSteps(parsed, false, false);
+      if (validationError) {
+        let errorMsg = 'Format invalide';
+        if (validationError.step === 'COUNTRY') {
+          errorMsg = 'Pays non UE: ' + parsed.countryCode;
+        } else if (validationError.step === 'FORMAT') {
+          errorMsg = 'Format invalide pour ' + parsed.countryCode;
+        } else if (validationError.step === 'ALGORITHM') {
+          errorMsg = 'Clé de contrôle invalide pour ' + parsed.countryCode;
+        }
         results.push({
           vatNumber: vat,
           valid: false,
           companyName: '',
           address: '',
-          error: 'Pays non UE: ' + parsed.countryCode
-        });
-        continue;
-      }
-      
-      // Vérifier le format et la clé de contrôle avant d'appeler l'API
-      if (!validateVATFormat(parsed.countryCode, parsed.vatNumber)) {
-        results.push({
-          vatNumber: vat,
-          valid: false,
-          companyName: '',
-          address: '',
-          error: 'Format invalide pour ' + parsed.countryCode
-        });
-        continue;
-      }
-      
-      if (!validateVATAlgorithm(parsed.countryCode, parsed.vatNumber)) {
-        results.push({
-          vatNumber: vat,
-          valid: false,
-          companyName: '',
-          address: '',
-          error: 'Clé de contrôle invalide pour ' + parsed.countryCode
+          error: errorMsg
         });
         continue;
       }
@@ -675,14 +648,19 @@ var TVA = (function() {
   /**
    * Génère un numéro de TVA valide (format + clé de contrôle) pour un pays donné
    * @param {string} countryCode - Code pays (ex: "FR", "DE", "IT")
-   * @return {string} Numéro de TVA valide avec préfixe pays (ex: "FR18417798402")
+   * @return {string} Numéro de TVA valide avec préfixe pays (ex: "FR18417798402") ou code d'erreur (ex: "ERROR:INVALID_ARGUMENT")
    */
   function generateVATNumber(countryCode) {
     if (!countryCode || countryCode.length !== 2) {
-      throw new Error('Code pays invalide. Utilisez un code à 2 lettres (ex: "FR", "DE")');
+      return 'ERROR:INVALID_ARGUMENT';
     }
     
     countryCode = countryCode.toUpperCase();
+    
+    // Vérifier que le pays est dans la liste des 27 pays UE supportés
+    if (!isSupportedCountry(countryCode)) {
+      return 'ERROR:UNSUPPORTED_COUNTRY';
+    }
     
     // Générer un numéro de base aléatoire et calculer la clé de contrôle
     switch (countryCode) {
@@ -699,12 +677,8 @@ var TVA = (function() {
         for (let i = 0; i < 8; i++) {
           deBase += Math.floor(Math.random() * 10).toString();
         }
-        let deSum = 0;
         const deWeights = [1, 2, 1, 2, 1, 2, 1, 2];
-        for (let i = 0; i < 8; i++) {
-          let product = parseInt(deBase[i]) * deWeights[i];
-          deSum += Math.floor(product / 10) + (product % 10);
-        }
+        const deSum = calculateWeightedSum(deBase, deWeights, 0, 8, true);
         const deCheck = (10 - (deSum % 10)) % 10;
         return countryCode + deBase + deCheck.toString();
         
@@ -714,12 +688,8 @@ var TVA = (function() {
         for (let i = 0; i < 10; i++) {
           itBase += Math.floor(Math.random() * 10).toString();
         }
-        let itSum = 0;
         const itWeights = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2];
-        for (let i = 0; i < 10; i++) {
-          let product = parseInt(itBase[i]) * itWeights[i];
-          itSum += Math.floor(product / 10) + (product % 10);
-        }
+        const itSum = calculateWeightedSum(itBase, itWeights, 0, 10, true);
         const itCheck = (10 - (itSum % 10)) % 10;
         return countryCode + itBase + itCheck.toString();
         
@@ -729,12 +699,8 @@ var TVA = (function() {
         for (let i = 0; i < 8; i++) {
           esBase += Math.floor(Math.random() * 10).toString();
         }
-        let esSum = 0;
         const esWeights = [2, 1, 2, 1, 2, 1, 2];
-        for (let i = 0; i < 7; i++) {
-          let product = parseInt(esBase[i]) * esWeights[i];
-          esSum += Math.floor(product / 10) + (product % 10);
-        }
+        const esSum = calculateWeightedSum(esBase, esWeights, 0, 7, true);
         const esCheck = (10 - (esSum % 10)) % 10;
         const letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
         const esLastChar = letters[esCheck];
@@ -753,11 +719,8 @@ var TVA = (function() {
         for (let i = 0; i < 9; i++) {
           nlBase += Math.floor(Math.random() * 10).toString();
         }
-        let nlSum = 0;
         const nlWeights = [9, 8, 7, 6, 5, 4, 3, 2];
-        for (let i = 0; i < 8; i++) {
-          nlSum += parseInt(nlBase[i]) * nlWeights[i];
-        }
+        const nlSum = calculateWeightedSum(nlBase, nlWeights, 0, 8, false);
         const nlCheck = nlSum % 11;
         if (nlCheck >= 10) {
           // Régénérer si le check est invalide
@@ -771,11 +734,8 @@ var TVA = (function() {
         for (let i = 0; i < 8; i++) {
           ptBase += Math.floor(Math.random() * 10).toString();
         }
-        let ptSum = 0;
         const ptWeights = [9, 8, 7, 6, 5, 4, 3, 2];
-        for (let i = 0; i < 8; i++) {
-          ptSum += parseInt(ptBase[i]) * ptWeights[i];
-        }
+        const ptSum = calculateWeightedSum(ptBase, ptWeights, 0, 8, false);
         let ptCheck = 11 - (ptSum % 11);
         if (ptCheck >= 10) ptCheck = 0;
         return countryCode + ptBase + ptCheck.toString();
@@ -786,12 +746,8 @@ var TVA = (function() {
         for (let i = 0; i < 8; i++) {
           atBase += Math.floor(Math.random() * 10).toString();
         }
-        let atSum = 0;
         const atWeights = [1, 2, 1, 2, 1, 2, 1, 2];
-        for (let i = 0; i < 8; i++) {
-          let product = parseInt(atBase[i]) * atWeights[i];
-          atSum += Math.floor(product / 10) + (product % 10);
-        }
+        const atSum = calculateWeightedSum(atBase, atWeights, 0, 8, true);
         const atCheck = (10 - (atSum % 10)) % 10;
         return countryCode + 'U' + atBase + atCheck.toString();
         
@@ -801,11 +757,8 @@ var TVA = (function() {
         for (let i = 0; i < 7; i++) {
           dkBase += Math.floor(Math.random() * 10).toString();
         }
-        let dkSum = 0;
         const dkWeights = [2, 7, 6, 5, 4, 3, 2];
-        for (let i = 0; i < 7; i++) {
-          dkSum += parseInt(dkBase[i]) * dkWeights[i];
-        }
+        const dkSum = calculateWeightedSum(dkBase, dkWeights, 0, 7, false);
         let dkCheck = dkSum % 11;
         if (dkCheck === 0) {
           dkCheck = 0;
@@ -823,11 +776,8 @@ var TVA = (function() {
         for (let i = 0; i < 7; i++) {
           fiBase += Math.floor(Math.random() * 10).toString();
         }
-        let fiSum = 0;
         const fiWeights = [7, 9, 10, 5, 8, 4, 2];
-        for (let i = 0; i < 7; i++) {
-          fiSum += parseInt(fiBase[i]) * fiWeights[i];
-        }
+        const fiSum = calculateWeightedSum(fiBase, fiWeights, 0, 7, false);
         let fiCheck = fiSum % 11;
         if (fiCheck === 0) {
           fiCheck = 0;
@@ -863,11 +813,8 @@ var TVA = (function() {
         for (let i = 0; i < 9; i++) {
           plBase += Math.floor(Math.random() * 10).toString();
         }
-        let plSum = 0;
         const plWeights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
-        for (let i = 0; i < 9; i++) {
-          plSum += parseInt(plBase[i]) * plWeights[i];
-        }
+        const plSum = calculateWeightedSum(plBase, plWeights, 0, 9, false);
         let plCheck = plSum % 11;
         if (plCheck === 10) {
           // Régénérer si invalide
@@ -881,11 +828,8 @@ var TVA = (function() {
         for (let i = 0; i < 9; i++) {
           skBase += Math.floor(Math.random() * 10).toString();
         }
-        let skSum = 0;
         const skWeights = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        for (let i = 0; i < 9; i++) {
-          skSum += parseInt(skBase[i]) * skWeights[i];
-        }
+        const skSum = calculateWeightedSum(skBase, skWeights, 0, 9, false);
         let skCheck = skSum % 11;
         if (skCheck === 10) {
           skCheck = 0;
@@ -893,8 +837,74 @@ var TVA = (function() {
         return countryCode + skBase + skCheck.toString();
         
       default:
-        // Pour les pays sans algorithme connu, générer un format basique
-        // Format générique : 8-10 chiffres aléatoires
+        // Pour les pays sans algorithme connu, générer selon le format du pays
+        // Utiliser les règles de format définies dans validateVATFormat
+        const formats = {
+          'BG': { length: [9, 10], pattern: /^\d{9,10}$/ },
+          'CY': { length: 9, pattern: /^\d{8}[A-Z]$/ },
+          'CZ': { length: [8, 9, 10], pattern: /^\d{8,10}$/ },
+          'EE': { length: 9, pattern: /^\d{9}$/ },
+          'EL': { length: 9, pattern: /^\d{9}$/ },
+          'HR': { length: 11, pattern: /^\d{11}$/ },
+          'HU': { length: 8, pattern: /^\d{8}$/ },
+          'IE': { length: [8, 9], pattern: /^[0-9A-Z]{8,9}$/ },
+          'LT': { length: [9, 12], pattern: /^(\d{9}|\d{12})$/ },
+          'LU': { length: 8, pattern: /^\d{8}$/ },
+          'LV': { length: 11, pattern: /^\d{11}$/ },
+          'MT': { length: 8, pattern: /^\d{8}$/ },
+          'RO': { length: [2, 10], pattern: /^\d{2,10}$/ },
+          'SI': { length: 8, pattern: /^\d{8}$/ }
+        };
+        
+        const format = formats[countryCode];
+        if (format) {
+          // Générer selon le format spécifique du pays
+          let length;
+          if (Array.isArray(format.length)) {
+            // Choisir une longueur aléatoire parmi les valeurs possibles
+            length = format.length[Math.floor(Math.random() * format.length.length)];
+          } else {
+            length = format.length;
+          }
+          
+          let generated = '';
+          
+          // Générer selon le pattern spécifique du pays
+          if (countryCode === 'CY') {
+            // Chypre : 8 chiffres + 1 lettre
+            for (let i = 0; i < 8; i++) {
+              generated += Math.floor(Math.random() * 10).toString();
+            }
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            generated += letters[Math.floor(Math.random() * letters.length)];
+          } else if (countryCode === 'IE') {
+            // Irlande : 8-9 caractères alphanumériques
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let i = 0; i < length; i++) {
+              generated += chars[Math.floor(Math.random() * chars.length)];
+            }
+          } else if (countryCode === 'LT') {
+            // Lituanie : soit 9 chiffres, soit 12 chiffres
+            const ltLength = length === 9 ? 9 : 12;
+            for (let i = 0; i < ltLength; i++) {
+              generated += Math.floor(Math.random() * 10).toString();
+            }
+          } else if (countryCode === 'RO') {
+            // Roumanie : 2 à 10 chiffres
+            for (let i = 0; i < length; i++) {
+              generated += Math.floor(Math.random() * 10).toString();
+            }
+          } else {
+            // Autres pays : chiffres uniquement selon la longueur
+            for (let i = 0; i < length; i++) {
+              generated += Math.floor(Math.random() * 10).toString();
+            }
+          }
+          
+          return countryCode + generated;
+        }
+        
+        // Fallback : format générique si le pays n'est pas dans la liste
         const length = Math.floor(Math.random() * 3) + 8; // 8, 9 ou 10 chiffres
         let genericBase = '';
         for (let i = 0; i < length; i++) {
