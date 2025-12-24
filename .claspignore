@@ -1,0 +1,31 @@
+# Documentation
+*.md
+README.md
+docs/
+
+# Scripts sources (on synchronise depuis sync-temp qui contient les copies)
+scripts/
+wrappers/
+
+# Fichiers système
+.DS_Store
+.git/
+.gitignore
+node_modules/
+
+# Fichiers de configuration
+.clasp.json
+.claspignore
+.clasp-projects.json
+package*.json
+
+# Scripts shell
+*.sh
+
+# Dossiers temporaires de synchronisation
+sync-temp*/
+sync-temp/
+
+# Fichiers .js générés
+*.js
+!node_modules/

@@ -4,9 +4,15 @@
 
 ### 1️⃣ Recevoir l'ID de la Bibliothèque
 
-Votre administrateur vous a envoyé un **ID de déploiement** (ex: `1AbC2dEf3GhI4jKl5MnOp6QrSt7UvWxYz`).
+Votre administrateur vous a envoyé un **ID de déploiement** :
+
+```
+AKfycbxTL7gysckYQaDEdT5hfHMdsXiEqCvg9JoBtBDX11FBNAUClH7nC9AXbOSPMniDR0Rrdw
+```
 
 📋 **Gardez cet ID précieusement** - vous en aurez besoin pour chaque nouveau Google Sheet.
+
+💡 **Note :** L'ID est également disponible dans le fichier `DEPLOIEMENT_ID.md` à la racine du projet.
 
 ---
 
@@ -26,14 +32,18 @@ Votre administrateur vous a envoyé un **ID de déploiement** (ex: `1AbC2dEf3GhI
 
 ### 3️⃣ Ajouter la Bibliothèque
 
-1. Dans l'éditeur Apps Script, cliquez sur **Ressources** > **Bibliothèques**
-2. Dans le champ **"ID de script"**, collez votre ID de déploiement :
+1. Cliquez sur **"Éditeur"** dans la barre latérale gauche
+2. Dans la partie supérieure de l'éditeur, cherchez et cliquez sur **"Bibliothèques"** (ou "Libraries")
+3. Cliquez sur le bouton **"+"** (Ajouter une bibliothèque)
+4. Dans le champ **"ID de script"**, collez l'ID de déploiement :
    ```
-   [COLLEZ_VOTRE_ID_ICI]
+   AKfycbxTL7gysckYQaDEdT5hfHMdsXiEqCvg9JoBtBDX11FBNAUClH7nC9AXbOSPMniDR0Rrdw
    ```
-3. Cliquez sur **Rechercher**
-4. Sélectionnez la **dernière version** (recommandé)
-5. Cliquez sur **Ajouter**
+5. Cliquez sur **"Rechercher"** ou appuyez sur Entrée
+6. Sélectionnez la **dernière version** (recommandé) dans le menu déroulant "Version"
+7. Cliquez sur **"Ajouter"**
+
+💡 **Emplacement :** Le menu Bibliothèques se trouve dans **"Éditeur"** (barre latérale gauche) > section **"Bibliothèques"** en haut de l'éditeur de code.
 
 ✅ **Bravo !** La bibliothèque est maintenant ajoutée.
 
@@ -41,8 +51,7 @@ Votre administrateur vous a envoyé un **ID de déploiement** (ex: `1AbC2dEf3GhI
 
 1. Dans l'éditeur Apps Script, supprimez tout le code existant (s'il y en a)
 2. Pour chaque bibliothèque que vous utilisez, ouvrez le fichier **`wrapper_functions.gs`** dans le dossier correspondant :
-   - Pour VAT : `bibliotheques/vat-check/wrapper_functions.gs`
-   - Pour Odoo : `bibliotheques/odoo/wrapper_functions.gs` (quand disponible)
+   - Pour VAT : `wrappers/TVA_wrapper_functions.gs`
    - etc.
 3. **Copiez-collez** tout le contenu dans l'éditeur Apps Script
 4. Répétez pour chaque bibliothèque si vous en utilisez plusieurs
@@ -140,7 +149,7 @@ Pour chaque nouveau Google Sheet :
 Quand une nouvelle version est disponible :
 
 1. Ouvrez votre projet Apps Script (Extensions > Apps Script)
-2. Cliquez sur **Ressources** > **Bibliothèques**
+2. Cliquez sur **"Éditeur"** dans la barre latérale gauche, puis sur **"Bibliothèques"** en haut de l'éditeur
 3. Cliquez sur ✏️ (Modifier) de la bibliothèque
 4. Sélectionnez la **nouvelle version**
 5. Cliquez sur **Enregistrer**
@@ -160,7 +169,7 @@ Quand une nouvelle version est disponible :
 ### ❌ "Fonction non définie"
 
 **Solution :**
-- Vérifiez que la bibliothèque est bien ajoutée dans **Ressources > Bibliothèques**
+- Vérifiez que la bibliothèque est bien ajoutée dans **Éditeur** > **Bibliothèques**
 - Vérifiez que vous avez copié les fonctions wrapper dans votre projet Apps Script
 - Rechargez votre Google Sheet (F5)
 
@@ -191,7 +200,7 @@ Quand une nouvelle version est disponible :
 ## ✅ Checklist d'Installation
 
 - [ ] ID de déploiement reçu
-- [ ] Bibliothèque ajoutée dans Ressources > Bibliothèques
+- [ ] Bibliothèque ajoutée dans Éditeur > Bibliothèques
 - [ ] Fonctions wrapper copiées-collées
 - [ ] Projet Apps Script enregistré
 - [ ] Test réussi avec une formule : `=VALIDATE_VAT("FR18417798402")`

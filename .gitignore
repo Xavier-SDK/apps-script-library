@@ -21,8 +21,14 @@ package-lock.json
 .clasp.json
 .clasprc.json
 
+# Fichiers .js générés par clasp (on garde seulement les .gs)
+*.js
+!node_modules/
+sync-temp-*/
+*.js
+
 # IDE
-.vscode/
+# .vscode/ est versionné pour la configuration de colorisation .gs
 .idea/
 *.sublime-project
 *.sublime-workspace

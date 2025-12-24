@@ -1,0 +1,11 @@
+{
+  "projects": {
+    "TVA": {
+      "scriptId": "1E9s8sErZAolahBT7pHR7EsmekAp5b_ZkAIKQ3cCzp13Zk6MKh2wSYQlL",
+      "sourceFile": "scripts/TVA.gs",
+      "description": "Bibliothèque de validation TVA VIES"
+    }
+  }
+}
+
+

@@ -27,7 +27,7 @@ Ce guide explique comment partager votre bibliothèque Google Apps Script avec v
 
 3. **Instructions pour vos collègues**
    - Ouvrir leur projet Google Apps Script
-   - Aller dans **Ressources** > **Bibliothèques**
+   - Aller dans **Éditeur** > **Bibliothèques**
    - Coller l'ID de déploiement
    - Cliquer sur **Rechercher** puis **Ajouter**
 
@@ -58,7 +58,7 @@ les numéros de TVA via le service VIES.
 Pour l'utiliser dans vos projets :
 
 1. Ouvrez votre projet Google Apps Script
-2. Allez dans Ressources > Bibliothèques
+2. Allez dans Éditeur > Bibliothèques
 3. Ajoutez l'ID suivant : [VOTRE_ID_DE_DEPLOIEMENT]
 4. Cliquez sur Rechercher puis Ajouter
 
@@ -90,7 +90,7 @@ Bonne utilisation !
 
 2. **Utilisateurs de la bibliothèque**
    - Ouvrir leur projet
-   - Aller dans **Ressources** > **Bibliothèques**
+   - Aller dans **Éditeur** > **Bibliothèques**
    - Cliquer sur ✏️ (Modifier) de la bibliothèque
    - Sélectionner la nouvelle version
    - Enregistrer
@@ -138,7 +138,7 @@ Pour savoir qui utilise votre bibliothèque :
 - Vérifiez que l'utilisateur a bien accès au projet de la bibliothèque
 
 **"Fonction non définie"**
-- Vérifiez que la bibliothèque est bien ajoutée dans Ressources > Bibliothèques
+- Vérifiez que la bibliothèque est bien ajoutée dans Éditeur > Bibliothèques
 - Vérifiez que vous utilisez le bon namespace : `VIES_VAT_Library.functionName()`
 
 ## 📝 Checklist de partage

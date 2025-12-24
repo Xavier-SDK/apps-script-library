@@ -26,20 +26,18 @@ Créer un repository partagé de bibliothèques Google Apps Script que votre éq
 
 ### 📦 Structure Modulaire
 
-Ce repository est organisé avec **une bibliothèque par dossier** sous `bibliotheques/` :
+Ce repository est organisé avec **une bibliothèque par fichier** :
 
 ```
-bibliotheques/
-├── vat-check/           # Bibliothèque VIES VAT
-│   ├── VIES_VAT_Library.gs
-│   ├── wrapper_functions.gs
-│   └── README.md
-├── odoo/                # Connecteur Odoo (à venir)
-│   ├── Odoo_Library.gs
-│   ├── wrapper_functions.gs
-│   └── README.md
-└── templates/           # Templates pour créer de nouvelles bibliothèques
+/
+├── scripts/                        Bibliothèques Apps Script
+│   └── TVA.gs                      Bibliothèque TVA VIES
+│
+└── wrappers/                       Fonctions wrapper pour Google Sheets
+    └── TVA_wrapper_functions.gs    Wrappers pour TVA
 ```
+
+Chaque bibliothèque est synchronisée dans son propre projet Apps Script via `.clasp-projects.json`.
 
 ### Option A : Bibliothèque Centralisée (Recommandé pour commencer)
 
@@ -63,9 +61,9 @@ Dans Google Apps Script, vous pouvez avoir **plusieurs fichiers `.gs`** dans le 
 **Pour chaque bibliothèque :**
 
 1. **Cliquez sur l'icône ➕** à gauche dans l'éditeur (Nouveau fichier)
-2. **Nommez le fichier** (ex: `01_VIES_VAT_Library.gs`)
+2. **Nommez le fichier** (ex: `01_TVA.gs`)
 3. **Copiez le contenu complet** du fichier depuis le repository :
-   - Ouvrez `bibliotheques/vat-check/VIES_VAT_Library.gs`
+   - Ouvrez `scripts/TVA.gs`
    - **Copiez TOUT le contenu** (toutes les fonctions de cette bibliothèque)
    - Collez dans votre nouveau fichier Apps Script
 4. **Enregistrez** (💾)
@@ -73,7 +71,7 @@ Dans Google Apps Script, vous pouvez avoir **plusieurs fichiers `.gs`** dans le 
 **Répétez pour chaque bibliothèque :**
 
 ```
-01_VIES_VAT_Library.gs  ← Toutes les fonctions VAT (validateVAT, validateVATCompany, etc.)
+01_TVA.gs               ← Toutes les fonctions VAT (validateVAT, validateVATCompany, etc.)
 02_Odoo_Library.gs      ← Toutes les fonctions Odoo (connect, searchRead, create, etc.)
 03_Autres_Outils.gs     ← Votre ensemble de fonctions personnalisées
 ```
@@ -104,7 +102,7 @@ Dans Google Apps Script, vous pouvez avoir **plusieurs fichiers `.gs`** dans le 
 
 Si vous préférez maintenir des bibliothèques séparées pour chaque outil :
 
-1. Pour chaque bibliothèque dans `bibliotheques/`, créez un projet Apps Script séparé
+1. Pour chaque bibliothèque dans `scripts/`, créez un projet Apps Script séparé
 2. Copiez uniquement le fichier `.gs` de cette bibliothèque dans le projet
 3. Déployez comme bibliothèque et obtenez un ID de déploiement
 4. Partagez plusieurs IDs à votre équipe (un par bibliothèque)
@@ -200,14 +198,18 @@ Cette méthode permet d'ajouter la bibliothèque **une seule fois** et de l'util
 
 ### 4.2 Ajouter la Bibliothèque
 
-1. Dans le projet Apps Script, cliquez sur **Ressources** > **Bibliothèques**
-2. Dans le champ **"ID de script"**, collez l'ID de déploiement :
+1. Dans l'éditeur Apps Script, cliquez sur **"Éditeur"** dans la barre latérale gauche
+2. Dans la partie supérieure de l'éditeur de code, cherchez et cliquez sur **"Bibliothèques"** (ou "Libraries")
+3. Cliquez sur le bouton **"+"** (Ajouter une bibliothèque)
+4. Dans le champ **"ID de script"**, collez l'ID de déploiement :
    ```
    [VOTRE_ID_DE_DEPLOIEMENT]
    ```
-3. Cliquez sur **Rechercher**
-4. Sélectionnez la **dernière version** (recommandé)
-5. Cliquez sur **Ajouter**
+5. Cliquez sur **"Rechercher"** ou appuyez sur Entrée
+6. Sélectionnez la **dernière version** (recommandé)
+7. Cliquez sur **"Ajouter"**
+
+💡 **Emplacement :** Le menu Bibliothèques se trouve dans **"Éditeur"** > section **"Bibliothèques"** en haut de l'éditeur de code.
 
 ✅ **C'est fait !** La bibliothèque est maintenant disponible.
 
@@ -217,12 +219,12 @@ Pour faciliter l'utilisation dans Google Sheets, créez des fonctions wrapper :
 
 **Option A : Utiliser les wrappers du repository**
 
-Copiez les fichiers `wrapper_functions.gs` de chaque bibliothèque depuis `bibliotheques/nom-bibliotheque/wrapper_functions.gs` et combinez-les dans votre projet Apps Script.
+Copiez les fichiers wrapper de chaque bibliothèque depuis `wrappers/Nom_Bibliotheque_wrapper_functions.gs` et combinez-les dans votre projet Apps Script.
 
 **Exemple :**
 
 ```javascript
-// Wrappers pour VAT (depuis bibliotheques/vat-check/wrapper_functions.gs)
+// Wrappers pour VAT (depuis wrappers/TVA_wrapper_functions.gs)
 function VALIDATE_VAT(vatNumber) {
   return VIES_VAT_Library.validateVAT(vatNumber);
 }
@@ -231,7 +233,7 @@ function VAT_COMPANY(vatNumber) {
   return VIES_VAT_Library.validateVATCompany(vatNumber);
 }
 
-// Wrappers pour Odoo (depuis bibliotheques/odoo/wrapper_functions.gs)
+// Wrappers pour Odoo (depuis wrappers/Odoo_wrapper_functions.gs)
 function ODOO_CONNECT(url, database, username, password) {
   return Odoo_Library.connect(url, database, username, password);
 }
@@ -239,7 +241,7 @@ function ODOO_CONNECT(url, database, username, password) {
 
 **Option B : Créer vos propres wrappers**
 
-Utilisez le template `bibliotheques/templates/TEMPLATE_WRAPPER.gs` comme base.
+Consultez `wrappers/TVA_wrapper_functions.gs` comme exemple.
 
 ⚠️ **Important** : Les fonctions wrapper doivent être dans **chaque projet Apps Script** qui utilise la bibliothèque, mais elles peuvent être copiées-collées facilement depuis les fichiers du repository.
 
@@ -320,7 +322,8 @@ Créez **un seul projet Apps Script** avec la bibliothèque, puis liez-le à tou
 ### Pour l'Équipe
 
 1. Ouvrez leur projet Apps Script (celui avec la bibliothèque)
-2. Cliquez sur **Ressources** > **Bibliothèques**
+2. Cliquez sur **"Éditeur"** dans la barre latérale gauche
+3. Cliquez sur **"Bibliothèques"** en haut de l'éditeur
 3. Cliquez sur ✏️ (Modifier) de la bibliothèque
 4. Sélectionnez la **nouvelle version**
 5. Cliquez sur **Enregistrer**
@@ -386,7 +389,7 @@ Créez **un seul projet Apps Script** avec la bibliothèque, puis liez-le à tou
 - ✅ Vérifiez que l'utilisateur a accès au projet de la bibliothèque
 
 #### "Fonction non définie"
-- ✅ Vérifiez que la bibliothèque est bien ajoutée dans Ressources > Bibliothèques
+- ✅ Vérifiez que la bibliothèque est bien ajoutée dans Éditeur > Bibliothèques
 - ✅ Vérifiez que vous utilisez le bon namespace : `VIES_VAT_Library.functionName()`
 - ✅ Pour les fonctions wrapper, vérifiez qu'elles sont bien dans le projet Apps Script
 
@@ -401,7 +404,7 @@ Créez **un seul projet Apps Script** avec la bibliothèque, puis liez-le à tou
 
 - 📖 [Guide de Partage Détaillé](./GUIDE_PARTAGE.md)
 - 📖 [README Principal](../README.md)
-- 💻 [Exemples d'Utilisation](../bibliotheques/vat-check/example_usage.gs)
+- 💻 Consultez le code source dans `scripts/TVA.gs` pour des exemples
 
 ---
 

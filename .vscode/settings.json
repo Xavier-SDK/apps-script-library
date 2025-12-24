@@ -1,0 +1,27 @@
+{
+  // Associer les fichiers .gs à JavaScript pour la colorisation syntaxique
+  "files.associations": {
+    "*.gs": "javascript"
+  },
+  
+  // Options JavaScript pour les fichiers .gs
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": false,
+    "editor.tabSize": 2
+  },
+  
+  // Désactiver les erreurs TypeScript pour les fichiers .gs
+  "javascript.validate.enable": true,
+  
+  // Exclure les fichiers .js générés par clasp de l'indexation
+  "files.exclude": {
+    "**/*.js": false
+  },
+  
+  // Configuration pour Google Apps Script
+  "files.encoding": "utf8",
+  "files.eol": "\n"
+}
+
+

@@ -27,8 +27,8 @@ Dans votre projet Apps Script partagé, créez **un fichier `.gs` par bibliothè
 Projet Apps Script : "Bibliothèque d'Outils Équipe"
 
 Fichiers .gs :
-├── 01_VIES_VAT_Library.gs      ← Ensemble complet de fonctions VAT
-│   └─ Namespace: VIES_VAT_Library (validateVAT, validateVATCompany, etc.)
+├── 01_TVA.gs                    ← Ensemble complet de fonctions VAT
+│   └─ Namespace: TVA (validateVAT, validateVATCompany, etc.)
 │
 ├── 02_Odoo_Library.gs           ← Ensemble complet de fonctions Odoo
 │   └─ Namespace: Odoo_Library (connect, searchRead, create, update, etc.)
@@ -60,9 +60,9 @@ Fichiers .gs :
 Pour chaque bibliothèque que vous voulez inclure :
 
 1. **Cliquez sur l'icône ➕** à gauche (Nouveau fichier)
-2. **Nommez le fichier** (ex: `01_VIES_VAT_Library.gs`)
+2. **Nommez le fichier** (ex: `01_TVA.gs`)
 3. **Copiez le contenu** du fichier depuis votre repository :
-   - Ouvrez `bibliotheques/vat-check/VIES_VAT_Library.gs`
+   - Ouvrez `scripts/TVA.gs`
    - Copiez tout le contenu
    - Collez dans votre nouveau fichier Apps Script
 4. **Enregistrez** (💾)
@@ -70,8 +70,8 @@ Pour chaque bibliothèque que vous voulez inclure :
 **Répétez pour chaque bibliothèque :**
 
 ```
-01_VIES_VAT_Library.gs  ← bibliotheques/vat-check/VIES_VAT_Library.gs
-02_Odoo_Library.gs      ← bibliotheques/odoo/Odoo_Library.gs
+01_TVA.gs                ← scripts/TVA.gs
+02_Odoo_Library.gs      ← scripts/Odoo_Library.gs
 03_Autres_Outils.gs     ← votre code personnalisé
 ```
 
@@ -87,7 +87,7 @@ Pour chaque bibliothèque que vous voulez inclure :
  */
 
 // ============================================================================
-// WRAPPERS POUR VAT (depuis bibliotheques/vat-check/wrapper_functions.gs)
+// WRAPPERS POUR VAT (depuis wrappers/TVA_wrapper_functions.gs)
 // ============================================================================
 
 /**
@@ -105,7 +105,7 @@ function VAT_COMPANY(vatNumber) {
 }
 
 // ============================================================================
-// WRAPPERS POUR ODOO (depuis bibliotheques/odoo/wrapper_functions.gs)
+// WRAPPERS POUR ODOO (depuis wrappers/Odoo_wrapper_functions.gs)
 // ============================================================================
 
 /**
@@ -139,7 +139,7 @@ function ODOO_CONNECT(url, database, username, password) {
 ### Convention de Nommage
 
 ```
-01_VIES_VAT_Library.gs          ← Bibliothèques principales (ordre alphabétique)
+01_TVA.gs                        ← Bibliothèques principales (ordre alphabétique)
 02_Odoo_Library.gs
 03_Data_Utils.gs
 ...
@@ -150,7 +150,7 @@ function ODOO_CONNECT(url, database, username, password) {
 ### Séparation des Responsabilités
 
 - **Un fichier = Un namespace/bibliothèque = Un ensemble de fonctions liées**
-  - Exemple : Toutes les fonctions VAT dans `01_VIES_VAT_Library.gs`
+  - Exemple : Toutes les fonctions VAT dans `01_TVA.gs`
   - Exemple : Toutes les fonctions Odoo dans `02_Odoo_Library.gs`
 - **Fichier séparé pour les wrappers** (plus facile à maintenir)
 - **Fichier de config séparé** si nécessaire (identifiants, URLs, etc.)
@@ -164,7 +164,7 @@ function ODOO_CONNECT(url, database, username, password) {
 
 **✅ Faites plutôt :**
 ```
-✅ 01_VIES_VAT_Library.gs   (1 fichier = toutes les fonctions VAT)
+✅ 01_TVA.gs                 (1 fichier = toutes les fonctions VAT)
 ✅ 02_Odoo_Library.gs       (1 fichier = toutes les fonctions Odoo)
 ```
 
@@ -173,8 +173,8 @@ function ODOO_CONNECT(url, database, username, password) {
 ```
 Projet Apps Script : "Bibliothèque d'Outils Équipe"
 
-01_VIES_VAT_Library.gs
-  └─ Namespace: VIES_VAT_Library
+01_TVA.gs
+  └─ Namespace: TVA
   
 02_Odoo_Library.gs
   └─ Namespace: Odoo_Library
@@ -195,14 +195,14 @@ Projet Apps Script : "Bibliothèque d'Outils Équipe"
 
 Quand vous ajoutez une nouvelle bibliothèque (ex: connecteur Odoo) :
 
-1. **Créez la bibliothèque** dans le repository : `bibliotheques/odoo/Odoo_Library.gs`
+1. **Créez la bibliothèque** dans le repository : `scripts/Odoo_Library.gs`
 2. **Dans le projet Apps Script** :
    - Créez un nouveau fichier : `02_Odoo_Library.gs`
-   - Copiez le contenu de `bibliotheques/odoo/Odoo_Library.gs`
+   - Copiez le contenu de `scripts/Odoo_Library.gs`
    - Collez dans le fichier Apps Script
 3. **Ajoutez les wrappers** :
    - Ouvrez `99_Wrappers.gs`
-   - Ajoutez les fonctions wrapper depuis `bibliotheques/odoo/wrapper_functions.gs`
+   - Ajoutez les fonctions wrapper depuis `wrappers/Odoo_wrapper_functions.gs` (ou `wrappers/TVA_wrapper_functions.gs` pour TVA)
 4. **Déployez une nouvelle version** :
    - Déployer > Gérer les déploiements
    - Modifier le déploiement existant
@@ -227,7 +227,7 @@ Quand vous ajoutez une nouvelle bibliothèque (ex: connecteur Odoo) :
 
 - **Installation unique** : un seul ID à ajouter
 - **Toutes les fonctions** disponibles immédiatement
-- **Mise à jour simple** : changer la version dans Ressources > Bibliothèques
+- **Mise à jour simple** : changer la version dans Éditeur > Bibliothèques
 - **Pas de confusion** : un seul projet à gérer
 
 ---
@@ -239,8 +239,8 @@ Quand vous ajoutez une nouvelle bibliothèque (ex: connecteur Odoo) :
 ```
 📁 Bibliothèque d'Outils Équipe
 
-📄 01_VIES_VAT_Library.gs
-   var VIES_VAT_Library = (function() {
+📄 01_TVA.gs
+   var TVA = (function() {
      // Code de validation TVA
      return {
        validateVAT: ...,

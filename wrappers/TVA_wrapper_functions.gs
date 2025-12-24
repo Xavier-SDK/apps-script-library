@@ -1,0 +1,169 @@
+/**
+ * 🔧 Fonctions Wrapper pour Google Sheets - VIES VAT Library
+ * 
+ * Fonctions wrapper pour faciliter l'utilisation de la bibliothèque TVA
+ * directement dans Google Sheets.
+ * 
+ * ⚠️ IMPORTANT : Configuration de l'identifiant de la bibliothèque
+ * 
+ * Quand vous ajoutez la bibliothèque dans Apps Script :
+ * 1. Éditeur > Bibliothèques > "+"
+ * 2. Ajoutez l'ID de script : 1E9s8sErZAolahBT7pHR7EsmekAp5b_ZkAIKQ3cCzp13Zk6MKh2wSYQlL
+ * 3. Dans le champ "Identifiant", utilisez : "SDK" (ou "TVA" si vous préférez)
+ * 
+ * ⚠️ IMPORTANT : Ce wrapper utilise l'identifiant "SDK" par défaut.
+ *    Si vous utilisez un autre identifiant, remplacez "SDK" par votre identifiant.
+ * 
+ * Le namespace de la bibliothèque est "TVA" dans le code.
+ * Avec l'identifiant "SDK", vous accédez aux fonctions via SDK.TVA.*
+ */
+
+// ============================================================================
+// DÉCLARATION DE TYPE POUR L'AUTOCOMPLÉTION
+// ============================================================================
+
+/**
+ * @typedef {Object} TVAObject
+ * @property {function(string, string=): boolean|Object} validateVAT - Valide un numéro de TVA. Mode: "debug" (détails), "force" (ignore format/clé), ou vide (normal)
+ * @property {function(string): string} validateVATCompany - Valide un numéro de TVA et retourne le nom de l'entreprise
+ * @property {function(string): Object} validateVATFull - Valide un numéro de TVA et retourne toutes les informations
+ * @property {function(Array<string>): Array<Object>} validateVATBatch - Valide plusieurs numéros de TVA en batch
+ * @property {function(string): string} generateVATNumber - Génère un numéro de TVA valide pour un pays donné
+ * @property {function(): string} getVersion - Retourne la version de la bibliothèque
+ * @property {function(): Array<string>} getSupportedCountries - Retourne la liste des codes pays supportés
+ */
+
+/**
+ * @typedef {Object} SDKObject
+ * @property {TVAObject} TVA - Objet contenant toutes les fonctions de validation TVA
+ */
+
+/**
+ * Variable globale SDK (définie par la bibliothèque ajoutée avec l'identifiant "SDK")
+ * Cette déclaration permet à l'éditeur de reconnaître le type et d'activer l'autocomplétion
+ * @type {SDKObject}
+ */
+var SDK;
+
+// ============================================================================
+// FONCTIONS POUR VALIDATION TVA VIES
+// ============================================================================
+
+/**
+ * Valide un numéro de TVA (pour Google Sheets)
+ * @param {string} vatNumber - Numéro de TVA complet (ex: "FR18417798402")
+ * @param {string=} mode - Mode optionnel : "debug" (détails), "force" (ignore format/clé), ou vide (normal)
+ * @return {boolean|string} VRAI si valide, FAUX sinon. En mode "debug", retourne une chaîne formatée
+ * @customfunction
+ */
+function ESTTVA(vatNumber, mode) {
+  if (!vatNumber) return false;
+  
+  mode = mode || '';
+  const vat = vatNumber.toString().trim();
+  
+  if (mode === 'debug') {
+    const result = SDK.TVA.validateVAT(vat, 'debug');
+    if (result.valid) {
+      return 'VALIDE';
+    } else {
+      // Retourner une chaîne formatée avec les détails
+      return result.step + ':' + result.reason;
+    }
+  }
+  
+  return SDK.TVA.validateVAT(vat, mode || '');
+}
+
+/**
+ * Retourne le nom de l'entreprise à partir d'un numéro de TVA
+ * @param {string} vatNumber - Numéro de TVA complet
+ * @return {string} Nom de l'entreprise ou "INVALIDE"
+ * @customfunction
+ */
+function TVA_SOCIETE(vatNumber) {
+  if (!vatNumber) return "";
+  return SDK.TVA.validateVATCompany(vatNumber.toString().trim());
+}
+
+/**
+ * Retourne l'adresse de l'entreprise à partir d'un numéro de TVA
+ * @param {string} vatNumber - Numéro de TVA complet
+ * @return {string} Adresse de l'entreprise ou "INVALIDE"
+ * @customfunction
+ */
+function TVA_ADDRESSE(vatNumber) {
+  if (!vatNumber) return "";
+  var result = SDK.TVA.validateVATFull(vatNumber.toString().trim());
+  if (result.valid && result.address) {
+    return result.address;
+  }
+  return "INVALIDE";
+}
+
+/**
+ * Retourne toutes les informations TVA sous forme de texte formaté
+ * @param {string} vatNumber - Numéro de TVA complet
+ * @return {string} Informations complètes formatées
+ * @customfunction
+ */
+function TVA_INFO(vatNumber) {
+  if (!vatNumber) return "";
+  var result = SDK.TVA.validateVATFull(vatNumber.toString().trim());
+  
+  if (result.error) {
+    return "ERREUR: " + result.error;
+  }
+  
+  if (result.valid) {
+    var info = result.companyName || "";
+    if (result.address) {
+      info += " - " + result.address;
+    }
+    return info;
+  }
+  
+  return "INVALIDE";
+}
+
+/**
+ * Retourne le statut de validation
+ * @param {string} vatNumber - Numéro de TVA complet
+ * @return {string} "VALIDE", "INVALIDE" ou "ERREUR"
+ * @customfunction
+ */
+function TVA_STATUS(vatNumber) {
+  if (!vatNumber) return "";
+  var result = SDK.TVA.validateVATFull(vatNumber.toString().trim());
+  
+  if (result.error) {
+    return "ERREUR";
+  }
+  
+  return result.valid ? "VALIDE" : "INVALIDE";
+}
+
+/**
+ * Retourne la version de la bibliothèque VAT
+ * @return {string} Version de la bibliothèque
+ * @customfunction
+ */
+function TVA_LIBRARY_VERSION() {
+  return SDK.TVA.getVersion();
+}
+
+/**
+ * Génère un numéro de TVA valide pour un pays donné (pour tests)
+ * @param {string} countryCode - Code pays à 2 lettres (ex: "FR", "DE")
+ * @return {string} Numéro de TVA valide avec préfixe pays
+ * @customfunction
+ */
+function TVA_GENERER(countryCode) {
+  if (!countryCode) return "";
+  try {
+    return SDK.TVA.generateVATNumber(countryCode.toString().trim().toUpperCase());
+  } catch (e) {
+    return "ERREUR: " + e.toString();
+  }
+}
+

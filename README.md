@@ -16,15 +16,9 @@ Permettre à une équipe de chefs de projet d'utiliser des fonctions Google Apps
 
 Bibliothèque pour valider les numéros de TVA de l'Union Européenne via le service VIES.
 
-- 📁 **Fichiers** : `bibliotheques/vat-check/`
-- 📖 **Documentation** : `bibliotheques/vat-check/README.md`
+- 📁 **Bibliothèque** : `scripts/TVA.gs`
+- 📁 **Wrappers** : `wrappers/TVA_wrapper_functions.gs`
 - 🔧 **Fonctions** : Validation TVA, récupération nom d'entreprise, validation en batch
-
-### 🚧 Odoo Connector (À venir)
-
-Connecteur pour interagir avec Odoo ERP.
-
-- 📁 **Fichiers** : `bibliotheques/odoo/` (à créer)
 
 ---
 
@@ -35,11 +29,12 @@ Connecteur pour interagir avec Odoo ERP.
 1. **Créez votre projet Apps Script partagé** : Suivez [GUIDE_SETUP_TEAM.md](./docs/GUIDE_SETUP_TEAM.md)
 2. **Organisez vos bibliothèques** : Voir [GUIDE_ORGANISATION_PROJET.md](./docs/GUIDE_ORGANISATION_PROJET.md)
 3. **Ajoutez de nouvelles bibliothèques** : Voir [GUIDE_AJOUTER_BIBLIOTHEQUE.md](./docs/GUIDE_AJOUTER_BIBLIOTHEQUE.md)
+4. **Synchronisez avec clasp** : Voir [CONFIGURATION_CLASP.md](./docs/CONFIGURATION_CLASP.md)
 
 ### Pour les Utilisateurs (Chefs de Projet)
 
-1. **Recevez l'ID de déploiement** de votre administrateur
-2. **Installez la bibliothèque** : Suivez [GUIDE_RAPIDE_EQUIPE.md](./GUIDE_RAPIDE_EQUIPE.md)
+1. **Récupérez l'ID de déploiement** : Consultez [DEPLOIEMENT_ID.md](./docs/DEPLOIEMENT_ID.md)
+2. **Installez la bibliothèque** : Suivez [GUIDE_RAPIDE_EQUIPE.md](./docs/GUIDE_RAPIDE_EQUIPE.md)
 3. **Utilisez les fonctions** directement dans vos Google Sheets !
 
 ---
@@ -57,10 +52,10 @@ Consultez **[INDEX_DOCUMENTATION.md](./docs/INDEX_DOCUMENTATION.md)** pour une v
   - Comment créer et déployer la bibliothèque
   - Comment la partager avec l'équipe
 
-- **[GUIDE_ORGANISATION_PROJET.md](./docs/GUIDE_ORGANISATION_PROJET.md)** 📁
-  - Comment organiser plusieurs bibliothèques dans un seul projet Apps Script
-  - Structure avec plusieurs fichiers `.gs`
-  - Bonnes pratiques
+- **[CONFIGURATION_CLASP.md](./docs/CONFIGURATION_CLASP.md)** ⚙️
+  - Configuration multi-projets avec clasp
+  - Synchronisation de chaque bibliothèque dans son propre projet
+
 
 - **[GUIDE_AJOUTER_BIBLIOTHEQUE.md](./docs/GUIDE_AJOUTER_BIBLIOTHEQUE.md)** 📦
   - Comment créer une nouvelle bibliothèque (ex: connecteur Odoo)
@@ -91,6 +86,7 @@ apps-script-library/
 │   ├── 📄 INDEX_DOCUMENTATION.md      Index complet de la documentation
 │   ├── 👨‍💼 Documentation Administrateurs
 │   │   ├── 📄 GUIDE_SETUP_TEAM.md     Guide de mise en place complet
+│   │   ├── 📄 CONFIGURATION_CLASP.md  Configuration multi-projets clasp
 │   │   ├── 📄 GUIDE_ORGANISATION_PROJET.md Comment organiser le projet Apps Script
 │   │   ├── 📄 GUIDE_AJOUTER_BIBLIOTHEQUE.md Comment créer de nouvelles bibliothèques
 │   │   ├── 📄 GUIDE_PARTAGE.md        Guide de partage détaillé
@@ -101,18 +97,11 @@ apps-script-library/
 │   │
 │   └── 📄 PUBLIER_GITHUB.md           Instructions rapides pour GitHub
 │
-└── 📦 bibliotheques/                   Bibliothèques modulaires
-    ├── vat-check/                      Bibliothèque VIES VAT
-    │   ├── VIES_VAT_Library.gs        Code source
-    │   ├── wrapper_functions.gs        Fonctions pour Google Sheets
-    │   ├── example_usage.gs            Exemples d'utilisation
-    │   └── README.md                   Documentation spécifique
-    │
-    ├── odoo/                           Connecteur Odoo (à venir)
-    │
-    └── templates/                      Templates pour nouvelles bibliothèques
-        ├── TEMPLATE_BIBLIOTHEQUE.gs
-        └── TEMPLATE_WRAPPER.gs
+├── 📁 scripts/                         Bibliothèques Apps Script
+│   └── TVA.gs                          Bibliothèque TVA VIES
+│
+└── 📁 wrappers/                        Fonctions wrapper pour Google Sheets
+    └── TVA_wrapper_functions.gs        Wrappers pour TVA
 ```
 
 ---
@@ -124,7 +113,7 @@ apps-script-library/
 - Compte Google (pour accéder à Google Apps Script)
 - Accès à [script.google.com](https://script.google.com)
 
-### Installation Clasp (Optionnel, pour développement)
+### Installation Clasp (Pour développement)
 
 Si vous voulez utiliser `clasp` pour synchroniser votre code local avec Apps Script :
 
@@ -135,14 +124,13 @@ npm install -g @google/clasp
 # Se connecter
 clasp login
 
-# Créer un projet Apps Script
-clasp create --type standalone --title "Bibliothèque d'Outils Équipe"
-
-# Pousser les fichiers
-clasp push
+# Synchroniser tous les projets
+./sync-clasp.sh
 ```
 
-⚠️ **Note** : `.clasp.json` est dans `.gitignore` pour des raisons de sécurité.
+Voir [CONFIGURATION_CLASP.md](./docs/CONFIGURATION_CLASP.md) pour la configuration multi-projets.
+
+⚠️ **Note** : `.clasp.json` et `.clasp-projects.json` sont dans `.gitignore` pour des raisons de sécurité.
 
 ---
 
@@ -167,20 +155,23 @@ clasp push
 
 ### Ajouter une Nouvelle Bibliothèque
 
-1. Créez un nouveau dossier dans `bibliotheques/`
-2. Utilisez les templates dans `bibliotheques/templates/`
-3. Suivez [GUIDE_AJOUTER_BIBLIOTHEQUE.md](./GUIDE_AJOUTER_BIBLIOTHEQUE.md)
-4. Testez votre bibliothèque
-5. Mettez à jour la documentation
-6. Proposez une Pull Request (si vous contribuez au repository public)
+1. Créez un nouveau fichier dans `scripts/` (ex: `Odoo_Library.gs`)
+2. Créez un nouveau projet Apps Script sur [script.google.com](https://script.google.com)
+3. Ajoutez l'entrée dans `.clasp-projects.json` avec le Script ID
+4. Créez les wrappers dans `wrappers/` (ex: `Odoo_wrapper_functions.gs`)
+5. Suivez [GUIDE_AJOUTER_BIBLIOTHEQUE.md](./docs/GUIDE_AJOUTER_BIBLIOTHEQUE.md)
+6. Testez votre bibliothèque
+7. Mettez à jour la documentation
+8. Synchronisez avec `./sync-clasp.sh`
 
 ### Mettre à Jour une Bibliothèque Existante
 
-1. Modifiez les fichiers dans `bibliotheques/nom-bibliotheque/`
+1. Modifiez les fichiers dans `scripts/nom-bibliotheque.gs`
 2. Testez les modifications
 3. Incrémentez la version dans le code
 4. Mettez à jour la documentation
-5. Déployez une nouvelle version dans Apps Script
+5. Synchronisez avec `./sync-clasp.sh`
+6. Déployez une nouvelle version dans Apps Script
 
 ---
 
@@ -208,7 +199,7 @@ Pour toute question ou problème :
 
 - 📧 Email : [votre-email]
 - 💬 Issues GitHub : [créez une issue]
-- 📖 Documentation : Consultez [INDEX_DOCUMENTATION.md](./INDEX_DOCUMENTATION.md)
+- 📖 Documentation : Consultez [INDEX_DOCUMENTATION.md](./docs/INDEX_DOCUMENTATION.md)
 
 ---
 
