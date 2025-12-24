@@ -33,6 +33,14 @@ sync_project() {
     
     cp "$source_file" "$temp_dir/"
     
+    # Si c'est le projet TVA, copier aussi IBAN.gs dans le même projet
+    if [ "$project_name" = "TVA" ]; then
+        if [ -f "scripts/IBAN.gs" ]; then
+            cp "scripts/IBAN.gs" "$temp_dir/"
+            echo "   📄 IBAN.gs ajouté au projet"
+        fi
+    fi
+    
     # Copier appsscript.json si présent
     if [ -f "appsscript.json" ]; then
         cp "appsscript.json" "$temp_dir/"

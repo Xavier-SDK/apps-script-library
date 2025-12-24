@@ -310,10 +310,31 @@ var TVA = (function() {
         if (plCheck === 10) return false; // Invalide
         return parseInt(digits[9]) === plCheck;
         
-      case 'CZ': // République tchèque : Modulo 11
+      case 'CZ': // République tchèque : Modulo 11 avec poids selon longueur
         if (digits.length < 8 || digits.length > 10) return false;
-        // Algorithme simplifié pour CZ
-        return digits.length >= 8;
+        
+        let czWeights, czLength;
+        if (digits.length === 8) {
+          // 8 chiffres : poids [8, 7, 6, 5, 4, 3, 2]
+          czWeights = [8, 7, 6, 5, 4, 3, 2];
+          czLength = 7;
+        } else if (digits.length === 9) {
+          // 9 chiffres : poids [9, 8, 7, 6, 5, 4, 3, 2]
+          czWeights = [9, 8, 7, 6, 5, 4, 3, 2];
+          czLength = 8;
+        } else {
+          // 10 chiffres : poids [10, 9, 8, 7, 6, 5, 4, 3, 2]
+          czWeights = [10, 9, 8, 7, 6, 5, 4, 3, 2];
+          czLength = 9;
+        }
+        
+        const czSum = calculateWeightedSum(digits, czWeights, 0, czLength, false);
+        // Formule corrigée : 11 - (sum % 11), si >= 10 alors check = 0
+        const czCheck = 11 - (czSum % 11);
+        const czCheckFinal = (czCheck >= 10) ? 0 : czCheck;
+        const czLastDigit = parseInt(digits[digits.length - 1]);
+        
+        return czCheckFinal === czLastDigit;
         
       case 'SK': // Slovaquie : Modulo 11
         if (digits.length !== 10) return false;
@@ -836,13 +857,42 @@ var TVA = (function() {
         }
         return countryCode + skBase + skCheck.toString();
         
+      case 'CZ': // République tchèque : Modulo 11 avec poids selon longueur
+        // Choisir une longueur aléatoire (8, 9 ou 10)
+        const czLengths = [8, 9, 10];
+        const czGenLength = czLengths[Math.floor(Math.random() * czLengths.length)];
+        
+        let czGenWeights, czGenBaseLength;
+        if (czGenLength === 8) {
+          czGenWeights = [8, 7, 6, 5, 4, 3, 2];
+          czGenBaseLength = 7;
+        } else if (czGenLength === 9) {
+          czGenWeights = [9, 8, 7, 6, 5, 4, 3, 2];
+          czGenBaseLength = 8;
+        } else {
+          czGenWeights = [10, 9, 8, 7, 6, 5, 4, 3, 2];
+          czGenBaseLength = 9;
+        }
+        
+        // Générer la base
+        let czGenBase = '';
+        for (let i = 0; i < czGenBaseLength; i++) {
+          czGenBase += Math.floor(Math.random() * 10).toString();
+        }
+        
+        // Calculer la clé de contrôle (formule : 11 - (sum % 11), si >= 10 alors check = 0)
+        const czGenSum = calculateWeightedSum(czGenBase, czGenWeights, 0, czGenBaseLength, false);
+        const czGenCheck = 11 - (czGenSum % 11);
+        const czGenCheckFinal = (czGenCheck >= 10) ? 0 : czGenCheck;
+        
+        return countryCode + czGenBase + czGenCheckFinal.toString();
+        
       default:
         // Pour les pays sans algorithme connu, générer selon le format du pays
         // Utiliser les règles de format définies dans validateVATFormat
         const formats = {
           'BG': { length: [9, 10], pattern: /^\d{9,10}$/ },
           'CY': { length: 9, pattern: /^\d{8}[A-Z]$/ },
-          'CZ': { length: [8, 9, 10], pattern: /^\d{8,10}$/ },
           'EE': { length: 9, pattern: /^\d{9}$/ },
           'EL': { length: 9, pattern: /^\d{9}$/ },
           'HR': { length: 11, pattern: /^\d{11}$/ },
